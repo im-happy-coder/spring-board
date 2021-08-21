@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+  
+  <!-- mybatis-config.xml에서 configuration를 등록하면 resultType를 BbsVO만 사용할 수 있다.  -->
+  <!-- BbsVO에 선언한 멤버변수가 DB에 만든 테이블 컬럼명과 동일 시 resultType를 사용한다. -->
+<mapper namespace="com.spring.DAO.BbsDAO">
+	
+	<insert id="insert">
+		insert into tbl_board(subject, content, writer) values(#{subject},#{content},#{writer})
+	</insert> 
+	
+	<select id="read" resultType="BbsVO">
+		select bid, subject, content, writer, regdate, hit from tbl_board where bid=#{bid}
+	</select>
+	
+	<update id="update">
+		update tbl_board set subject=#{subject}, content=#{content}, writer=#{writer}, regdate=now() where bid=#{bid}
+	</update>
+	
+	<delete id="delete">
+		delete from tbl_board where bid=#{bid}	
+	</delete>
+	
+	<update id="boardHit" parameterType="int">
+		update tbl_board set hit = hit + 1 where bid = #{bid} 
+	</update>
+	
+	<select id="list" resultType="com.spring.VO.BbsVO">
+	<![CDATA[
+		select bid, subject, content, writer, regdate, hit from 
+			tbl_board where bid > 0 order by bid desc, regdate desc 
+		]]>
+	</select>
+	
+	<!-- paging -->
+	<select id="listPage" resultType="BbsVO">
+		<![CDATA[
+			select
+				bid, subject, content, writer, regdate, hit
+			from
+				tbl_board
+			where bid > 0
+				order by bid desc, regdate desc
+			limit #{page}, 10
+		]]>
+	</select>
+	
+	
+	<!-- #{startPage}는 getStartPage()메소드를 호출하는것과 같다. #{numPerPage}는 numPerPage()메소드를 호출하는것과 같다. -->
+	<select id="listCriteria" resultType="BbsVO">
+		<![CDATA[
+			select 
+				bid, subject, content, writer, regdate, hit
+			from
+				tbl_board
+			where bid > 0
+				order by bid desc, regdate desc
+			limit #{startPage}, #{numPerPage}
+		]]>
+	</select>
+	
+	
+	
+	<select id="countData" resultType="int">
+		<![CDATA[
+			select count(*) from tbl_board where bid > 0
+		]]>
+	</select>
+	
+	<!-- MyBatis 표현식 이용 
+		검색 조건이 and subject like %#{keywork}% 이렇게 되면 굉장히 불편하다
+		
+		MyBatis에서 제공하는 <include>, <sql>
+	-->
+	<sql id="findSql">
+		<if test="findType != null">
+				<if test="findType == 'S'.toString()">
+					and subject like CONCAT('%',#{keyword},'%')
+				</if>
+				<if test="findType =='C'.toString()">
+					and content like CONCAT('%', #{keyword}, '%')
+				</if>
+				<if test="findType =='W'.toString()">
+					and writer like CONCAT('%', #{keyword}, '%')
+				</if>
+				<if test="findType =='SC'.toString()">
+					and (subject like CONCAT('%', #{keyword}, '%') 
+					or content like CONCAT('%', #{keyword}, '%'))
+				</if>
+				<if test="findType =='CW'.toString()">
+					and (content like CONCAT('%', #{keyword}, '%') 
+					or writer like CONCAT('%', #{keyword}, '%'))
+				</if>
+				<if test="findType =='SCW'.toString()">
+					and (subject like CONCAT('%', #{keyword}, '%')
+					or content like CONCAT('%', #{keyword}, '%')
+					or writer like CONCAT('%', #{keyword}, '%'))
+				</if>
+			</if>
+	</sql>
+	<select id="listFind" resultType="BbsVO">
+		<![CDATA[
+			select * from tbl_board
+			where bid > 0
+			]]>
+			<include refid="findSql"></include>
+		<![CDATA[
+			order by bid desc
+			limit #{startPage}, #{numPerPage}			
+		]]>
+	</select>
+	
+	<select id="findCountData" resultType="int">
+		<![CDATA[
+			select count(bid) from tbl_board where bid > 0
+			]]>
+			<include refid="findSql"></include>
+	</select>
+</mapper>
