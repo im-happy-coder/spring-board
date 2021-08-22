@@ -55,7 +55,7 @@
 
 ------------
 # Back-End
-> 페이징 VO(DTO)
+> 페이징 VO(DTO) 클래스
 ```
 public class PageCriteria {
 	private int page;
@@ -143,34 +143,31 @@ public class PagingMaker {
 > 페이징처리 view화면(JSP) JSTL태그 라이브러리 이용   
 ```
 <c:if test="${pagingMaker.prev}">
-						   <button type="button" class="btn btn-theme03" onclick="goPage()" >◀◀</button>
-						</c:if>
+ <button type="button" class="btn btn-theme03" onclick="goPage()" >◀◀</button>
+</c:if>
 						
-						<c:if test="${pagingMaker.prev}">
-						  <a href="list${pagingMaker.makeFind(pagingMaker.startPage - 1)}"> 
-							  <button type="button" class="btn btn-theme03">◀</button>
-						  </a>
-						</c:if>
+<c:if test="${pagingMaker.prev}">
+	 <a href="list${pagingMaker.makeFind(pagingMaker.startPage - 1)}"> <button type="button" class="btn btn-theme03">◀</button> </a>
+</c:if>
 						
-						<c:forEach begin="${pagingMaker.startPage}" end="${pagingMaker.endPage}" var="pNum">
-						<a href="list${pagingMaker.makeFind(pNum)}">
-						  	<button type="button" 
-						  		class="<c:out value="${pagingMaker.cri.page == pNum ? 'btn btn-theme':'btn btn-default'}"/>">${pNum}</button>
-					      </a>
-						</c:forEach>
+<c:forEach begin="${pagingMaker.startPage}" end="${pagingMaker.endPage}" var="pNum">
+	<a href="list${pagingMaker.makeFind(pNum)}">
+		<button type="button" class="<c:out value="${pagingMaker.cri.page == pNum ? 'btn btn-theme':'btn btn-default'}"/>">${pNum}</button>
+	</a>
+</c:forEach>
 						
-						  <c:if test="${pagingMaker.next && pagingMaker.endPage > 0}">
-							 <a href="list${pagingMaker.makeFind(pagingMaker.endPage + 1)}"> 
-							 	<button type="button" class="btn btn-theme03">▶</button>
-						  	</a>
-						  </c:if>
-						  
-						  
-					  	  <c:if test="${pagingMaker.next && pagingMaker.endPage > 0}">
-							 <a href="list${pagingMaker.makeFind(finalEndPage)}"> 
-							 	<button type="button" class="btn btn-theme03">▶▶</button>
-						  	</a>
-						  </c:if>
+<c:if test="${pagingMaker.next && pagingMaker.endPage > 0}">
+ <a href="list${pagingMaker.makeFind(pagingMaker.endPage + 1)}"> 
+	<button type="button" class="btn btn-theme03">▶</button>
+</a>
+</c:if>
+
+
+<c:if test="${pagingMaker.next && pagingMaker.endPage > 0}">
+ <a href="list${pagingMaker.makeFind(finalEndPage)}"> 
+	<button type="button" class="btn btn-theme03">▶▶</button>
+</a>
+</c:if>
 ```
 ![페이징1](https://user-images.githubusercontent.com/77142806/130359455-23930ae9-9c2a-4d5e-b0c8-3e5264db6b8d.PNG)
 ![페이징2](https://user-images.githubusercontent.com/77142806/130359449-9aef0ddc-ac26-4db5-a5dc-119e84c81d1c.PNG)
