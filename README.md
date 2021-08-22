@@ -32,7 +32,7 @@
 ![설계구조](https://user-images.githubusercontent.com/77142806/130358790-bbcfa44e-efca-48da-9409-8c82df453b0b.PNG)
 ------------
 ------------
-# Front-End 작동 화면 미리 보기
+# 작동 화면 미리 보기
 ------------
 # Back-End
 ------------
