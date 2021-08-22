@@ -291,6 +291,143 @@ public class PagingMaker {
 </select>
 ```
 
+## 게시판 CRUD
+> 게시판 CRUD DAO, DAO Implements(구현) 클래스
+
+```
+public void insert(BbsVO bvo) throws Exception;
+	
+	public BbsVO read(Integer bid) throws Exception;
+	
+	public void update(BbsVO bvo) throws Exception;
+	
+	public void delete(Integer bid) throws Exception;
+
+	public void boardHit(int bno) throws Exception;
+		
+	public List<BbsVO> list() throws Exception;
+	
+	public List<BbsVO> listPage(int page) throws Exception;
+}
+
+
+@Repository
+public class BbsDAOImpl implements BbsDAO {
+
+	@Inject
+	private SqlSession sqlSession;
+	
+	@Override
+	public void insert(BbsVO bvo) throws Exception {
+		sqlSession.insert("insert", bvo);
+	}
+	
+	@Override
+	public BbsVO read(Integer bid) throws Exception {
+		return sqlSession.selectOne("read", bid);
+	}
+	
+	
+	@Override
+	public void update(BbsVO bvo) throws Exception {
+		sqlSession.update("update", bvo);
+	}
+	
+	@Override
+	public void delete(Integer bid) throws Exception {
+		sqlSession.delete("delete", bid);
+	}
+	
+	@Override
+	public List<BbsVO> list() throws Exception {
+		return sqlSession.selectList("list");
+	}
+```
+
+> 게시판 CRUD Service클래스와 Service Implements(구현) 클래스
+
+
+```
+public interface BbsService {
+	public void write(BbsVO bvo) throws Exception;
+	
+	public BbsVO read(Integer bid) throws Exception;
+	
+	public void modfiy(BbsVO bvo) throws Exception;
+	
+	public void remove(Integer bid) throws Exception;
+	
+	public List<BbsVO> list() throws Exception;
+}
+
+@Service
+public class BbsServiceImpl implements BbsService {
+	
+	@Inject
+	private BbsDAO bdao;
+	
+	@Override
+	public void write(BbsVO bvo) throws Exception {
+		bdao.insert(bvo);
+	}
+	
+	@Transactional(isolation = Isolation.READ_COMMITTED)
+	@Override
+	public BbsVO read(Integer bid) throws Exception {
+		bdao.boardHit(bid);
+		return bdao.read(bid);
+	}
+	
+	@Override
+	public void modfiy(BbsVO bvo) throws Exception {
+		bdao.update(bvo);
+	}
+	
+	@Override
+	public void remove(Integer bid) throws Exception {
+		bdao.delete(bid);
+	}
+	
+	@Override
+	public List<BbsVO> list() throws Exception {
+		return bdao.list();
+	}
+	
+```
+
+> 게시판 CRUD mapper.xml
+
+```
+<insert id="insert">
+		insert into tbl_board(subject, content, writer) values(#{subject},#{content},#{writer})
+</insert> 
+
+<select id="read" resultType="BbsVO">
+	select bid, subject, content, writer, regdate, hit from tbl_board where bid=#{bid}
+</select>
+
+<update id="update">
+	update tbl_board set subject=#{subject}, content=#{content}, writer=#{writer}, regdate=now() where bid=#{bid}
+</update>
+
+<delete id="delete">
+	delete from tbl_board where bid=#{bid}	
+</delete>
+
+<update id="boardHit" parameterType="int">
+	update tbl_board set hit = hit + 1 where bid = #{bid} 
+</update>
+
+<select id="list" resultType="com.spring.VO.BbsVO">
+<![CDATA[
+	select bid, subject, content, writer, regdate, hit from 
+		tbl_board where bid > 0 order by bid desc, regdate desc 
+	]]>
+</select>
+```
+
+
+
 ------------
 # 주요 이슈
 1. 가장 자주 겪은 이슈는 버전 호환입니다. 스프링 프레임워크의 버전이나 자바 JDK의 버전이
