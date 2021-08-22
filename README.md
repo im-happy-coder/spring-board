@@ -55,6 +55,123 @@
 
 ------------
 # Back-End
+> 페이징 VO(DTO)
+```
+public class PageCriteria {
+	private int page;
+	private int numPerPage;
+	
+	
+	public PageCriteria() {
+		this.page = 1;
+		this.numPerPage = 10;
+	}
+	
+	public void setPage(int Page) {
+		if(page<=0) {
+			this.page=1;
+			return;
+		}
+		this.page = Page;
+	}
+	
+	public void setNumPerPage(int numPerPage) {
+		if(numPerPage <= 0 || numPerPage > 100) {
+			this.numPerPage = 10;
+			return;
+		}
+		this.numPerPage = numPerPage;
+	}
+	
+	public int getPage() {
+		return page;
+	}
+
+	public int getStartPage() {
+		return (this.page -1 )*numPerPage;
+	}
+	
+	public int getNumPerPage() {
+		return numPerPage;
+	}
+	@Override
+	public String toString() {
+		return "PageCriteria[page="+page+","+"numPerPage"+numPerPage+"]";
+	}
+	
+```
+```
+public class PagingMaker {
+	private int totalData; //전체 데이터 갯수
+	private int startPage; //페이지목록의 시작번호
+	private int endPage;  //페이지목록의 끝번호
+	private boolean prev; //이전 버튼을 나타내는 부울 값
+	private boolean next; //다음 버튼
+	private int finalEndPage; //마지막 페이지
+	private int displayPageNum = 10; //하단에 나타내는 시작번호, 끝번호의 수
+	private PageCriteria cri;
+	
+	public void setCri(PageCriteria cri) {
+		this.cri = cri;
+	}
+	public void setTotalData(int totalData) {
+		this.totalData = totalData;
+		getPagingData();
+	}
+	public int getFinalEndPage() {
+		finalEndPage = (int)(Math.ceil(totalData / (double)cri.getNumPerPage()));
+		return finalEndPage;
+	}
+	public void setFinalEndPage(int finalEndPage) {
+		this.finalEndPage = finalEndPage;
+	}
+	//시작페이지, 끝페이지 구하기
+	private void getPagingData() {
+		//Math.ceil함수는 double형이므로 소수점으로 받아야한다.
+		endPage = (int)(Math.ceil(cri.getPage()/(double)displayPageNum) * displayPageNum);
+		startPage = (endPage - displayPageNum) + 1;
+		
+		finalEndPage = (int)(Math.ceil(totalData / (double)cri.getNumPerPage()));
+		if(endPage > finalEndPage) {
+			endPage = finalEndPage;
+		}
+		
+		prev = startPage == 1 ? false : true;
+		next = endPage*cri.getNumPerPage() >= totalData ? false : true;
+	}//getPageingData()
+```
+> 페이징처리 view화면(JSP) JSTL태그 라이브러리 이용   
+```
+<c:if test="${pagingMaker.prev}">
+						   <button type="button" class="btn btn-theme03" onclick="goPage()" >◀◀</button>
+						</c:if>
+						
+						<c:if test="${pagingMaker.prev}">
+						  <a href="list${pagingMaker.makeFind(pagingMaker.startPage - 1)}"> 
+							  <button type="button" class="btn btn-theme03">◀</button>
+						  </a>
+						</c:if>
+						
+						<c:forEach begin="${pagingMaker.startPage}" end="${pagingMaker.endPage}" var="pNum">
+						<a href="list${pagingMaker.makeFind(pNum)}">
+						  	<button type="button" 
+						  		class="<c:out value="${pagingMaker.cri.page == pNum ? 'btn btn-theme':'btn btn-default'}"/>">${pNum}</button>
+					      </a>
+						</c:forEach>
+						
+						  <c:if test="${pagingMaker.next && pagingMaker.endPage > 0}">
+							 <a href="list${pagingMaker.makeFind(pagingMaker.endPage + 1)}"> 
+							 	<button type="button" class="btn btn-theme03">▶</button>
+						  	</a>
+						  </c:if>
+						  
+						  
+					  	  <c:if test="${pagingMaker.next && pagingMaker.endPage > 0}">
+							 <a href="list${pagingMaker.makeFind(finalEndPage)}"> 
+							 	<button type="button" class="btn btn-theme03">▶▶</button>
+						  	</a>
+						  </c:if>
+```
 ![페이징1](https://user-images.githubusercontent.com/77142806/130359455-23930ae9-9c2a-4d5e-b0c8-3e5264db6b8d.PNG)
 ![페이징2](https://user-images.githubusercontent.com/77142806/130359449-9aef0ddc-ac26-4db5-a5dc-119e84c81d1c.PNG)
 
