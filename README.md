@@ -55,6 +55,10 @@
 
 ------------
 # Back-End
+
+## 페이징 처리
+![페이징1](https://user-images.githubusercontent.com/77142806/130359455-23930ae9-9c2a-4d5e-b0c8-3e5264db6b8d.PNG)
+![페이징2](https://user-images.githubusercontent.com/77142806/130359449-9aef0ddc-ac26-4db5-a5dc-119e84c81d1c.PNG)
 > 페이징 VO(DTO) 클래스
 ```
 public class PageCriteria {
@@ -169,8 +173,123 @@ public class PagingMaker {
 </a>
 </c:if>
 ```
-![페이징1](https://user-images.githubusercontent.com/77142806/130359455-23930ae9-9c2a-4d5e-b0c8-3e5264db6b8d.PNG)
-![페이징2](https://user-images.githubusercontent.com/77142806/130359449-9aef0ddc-ac26-4db5-a5dc-119e84c81d1c.PNG)
+
+> 페이징 mapper.xml
+
+```
+<!-- paging -->
+<select id="listPage" resultType="BbsVO">
+	<![CDATA[
+		select
+			bid, subject, content, writer, regdate, hit
+		from
+			tbl_board
+		where bid > 0
+			order by bid desc, regdate desc
+		limit #{page}, 10
+	]]>
+</select>
+
+<select id="listCriteria" resultType="BbsVO">
+	<![CDATA[
+		select 
+			bid, subject, content, writer, regdate, hit
+		from
+			tbl_board
+		where bid > 0
+			order by bid desc, regdate desc
+		limit #{startPage}, #{numPerPage}
+	]]>
+</select>
+```
+
+
+## 검색 기능
+> view(JSP) select태그를 사용하여 옵션 제공
+
+
+```
+ <select name="findType">
+  <option value="N"
+	<c:out value="${ fCri.findType == null ? 'selected' : ''}"/>>---------</option>
+  <option value="S"
+	<c:out value="${fCri.findType == 'S' ? 'selected' : '' }"/>>제목</option>
+  <option value="C"
+	<c:out value="${fCri.findType == 'C' ? 'selected' : '' }"/>>내용</option>
+  <option value="W"
+	<c:out value="${fCri.findType == 'W' ? 'selected' : '' }"/>>작성자</option>
+  <option value="SC"
+	<c:out value="${fCri.findType == 'SC' ? 'selected' : '' }"/>>제목+내용</option>
+  <option value="CW"
+	<c:out value="${fCri.findType == 'CW' ? 'selected' : '' }"/>>내용+작성자</option>
+  <option value="SCW"
+	<c:out value="${fCri.findType == 'SCW' ? 'selected' : '' }"/>>제목+내용+작성자</option>
+</select>
+<input type="text" name="keyword" id="findword" value="${fCri.keyword }"/>
+<button id="findBtn">검색</button>
+
+<script type="text/javascript">
+	$(document).ready(function(){
+		$('#findBtn').on("click", function(e){
+				self.location = "list"+"${pagingMaker.makeURI(1)}"
+					+"&findType="+$("select option:selected").val()
+					+"&keyword="+$("#findword").val();
+		});
+
+		$('#writeBtn').on("click", function(e){
+			self.location = "write";
+		});
+	});
+</script>
+```
+> 검색 시 DB처리 mapper.xml (Mybatis표현식 사용)
+
+```
+<sql id="findSql">
+	<if test="findType != null">
+			<if test="findType == 'S'.toString()">
+				and subject like CONCAT('%',#{keyword},'%')
+			</if>
+			<if test="findType =='C'.toString()">
+				and content like CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="findType =='W'.toString()">
+				and writer like CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="findType =='SC'.toString()">
+				and (subject like CONCAT('%', #{keyword}, '%') 
+				or content like CONCAT('%', #{keyword}, '%'))
+			</if>
+			<if test="findType =='CW'.toString()">
+				and (content like CONCAT('%', #{keyword}, '%') 
+				or writer like CONCAT('%', #{keyword}, '%'))
+			</if>
+			<if test="findType =='SCW'.toString()">
+				and (subject like CONCAT('%', #{keyword}, '%')
+				or content like CONCAT('%', #{keyword}, '%')
+				or writer like CONCAT('%', #{keyword}, '%'))
+			</if>
+		</if>
+</sql>
+<select id="listFind" resultType="BbsVO">
+	<![CDATA[
+		select * from tbl_board
+		where bid > 0
+		]]>
+		<include refid="findSql"></include>
+	<![CDATA[
+		order by bid desc
+		limit #{startPage}, #{numPerPage}			
+	]]>
+</select>
+	
+<select id="findCountData" resultType="int">
+	<![CDATA[
+		select count(bid) from tbl_board where bid > 0
+		]]>
+		<include refid="findSql"></include>
+</select>
+```
 
 ------------
 # 주요 이슈
