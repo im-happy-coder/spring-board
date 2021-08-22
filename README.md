@@ -33,8 +33,31 @@
 ------------
 ------------
 # 작동 화면 미리 보기
+> 게시글 쓰기   
+![글쓰기](https://user-images.githubusercontent.com/77142806/130359474-ed4a98cf-e6dc-4d3b-abec-8f584512fdd0.gif)
+
+
+> 게시글 수정   
+![글수정](https://user-images.githubusercontent.com/77142806/130359464-408b4edb-ce0a-434e-9039-1d17f874f75d.gif)
+
+
+> 게시글 삭제   
+![글삭제](https://user-images.githubusercontent.com/77142806/130359462-b2b3102e-ec1a-49b9-a73f-fdb96c09e121.gif)
+
+
+> 검색 기능   
+![검색](https://user-images.githubusercontent.com/77142806/130359457-7d705851-24f9-4d46-bd80-aaf5116982ca.gif)
+
+
+> 댓글 쓰기, 수정, 삭제   
+![댓글수정삭제](https://user-images.githubusercontent.com/77142806/130359477-4d92e480-d721-4e80-b07b-53f92b32913a.gif)
+
+
 ------------
 # Back-End
+![페이징1](https://user-images.githubusercontent.com/77142806/130359455-23930ae9-9c2a-4d5e-b0c8-3e5264db6b8d.PNG)
+![페이징2](https://user-images.githubusercontent.com/77142806/130359449-9aef0ddc-ac26-4db5-a5dc-119e84c81d1c.PNG)
+
 ------------
 # 주요 이슈
 1. 가장 자주 겪은 이슈는 버전 호환입니다. 스프링 프레임워크의 버전이나 자바 JDK의 버전이
